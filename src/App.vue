@@ -78,7 +78,6 @@ onMounted(() => {
             receiveBuffer = [];
             receiveProgress = 0;
 
-
             receivedFiles.value.push(a);
           }
         }
@@ -138,7 +137,7 @@ function sendFile(file: File) {
   });
 }
 
-function chunkedReader(file: File, chunkSize: number = 16 * 1024) {
+function chunkedReader(file: File, chunkSize: number = 1024 * 1024 * 1024) {
   return function* () {
     let offset = 0;
     while (offset < file.size) {
