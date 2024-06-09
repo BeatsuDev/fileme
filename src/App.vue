@@ -1,21 +1,11 @@
 <script setup lang="ts">
 import { generateSlug } from "random-word-slugs";
 import { Peer } from "peerjs";
-import { ref, watch, onMounted } from "vue";
+import { ref, onMounted } from "vue";
+import FileSelector from "./components/FileSelector.vue";
 
 // File selection logic
-const selectedFiles = ref<FileList | null>(null);
-const selectedFilesDiv = ref<HTMLSpanElement | null>(null);
-
-function onInputChange(e: Event) {
-  const input = e.target as HTMLInputElement;
-  selectedFiles.value = input.files;
-}
-
-watch(selectedFiles, files => {
-  if (!selectedFilesDiv.value) return;
-  selectedFilesDiv.value.textContent = files ? Array.from(files).map(file => file.name).join(", ") : "";
-});
+const selectedFile = ref<File | null>(null);
 
 // Peer logic
 const progressElement = ref<HTMLProgressElement | null>(null);
@@ -106,8 +96,8 @@ onMounted(() => {
 })
 
 function sendFileClicked() {
-  if (!selectedFiles.value) return alert("No file selected");
-  sendFile(selectedFiles.value[0]);
+  if (!selectedFile.value) return alert("No file selected");
+  sendFile(selectedFile.value);
 }
 
 function sendFile(file: File) {
@@ -163,11 +153,8 @@ function chunkedReader(file: File, chunkSize: number = 1024 * 1024 * 1024) {
       </div>
       <div id="sending-container">
         <label for="slug-input">Receivers ID: <input ref="slugInput" type="text"></label>
-        <label for="file" @dragover.prevent @drop.prevent="e => selectedFiles = e.dataTransfer?.files ?? null">
-          <input @change="onInputChange" type="file" id="file" style="display: none" />
-          Select or drop a file here.
-        </label>
-        <div>Selected file: <span ref="selectedFilesDiv" id="selected-files-span"></span></div>
+        <FileSelector v-model="selectedFile" />
+        <div>Selected file: <span id="selected-files-span">{{ selectedFile?.name ?? "" }}</span></div>
         <button @click="sendFileClicked">Send file</button>
       </div>
     </div>
@@ -202,18 +189,5 @@ function chunkedReader(file: File, chunkSize: number = 1024 * 1024 * 1024) {
   flex-direction: column;
   align-items: center;
   gap: 10px;
-}
-
-label[for="file"] {
-  padding: 20px;
-  border: 2px dashed #ccc;
-  border-radius: 5px;
-  width: 400px;
-  height: 200px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 20px;
-  cursor: pointer;
 }
 </style>
